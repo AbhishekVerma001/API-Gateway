@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+              allowedOrigins: "*"
+              allowedMethods: "*"
+              allowedHeaders: "*"
+      routes:
+       - id: Products
+         uri: lb://Products
+         predicates:
+           - Path=/products/**,/cart-details,/search/findByNameContaining,/product-category,/countries,/states/search/findByCountryCode
+         filters:
+           - AuthenticationFilter
+
+
+       - id: Payment
+         uri: lb://Payment
+         predicates:
+           - Path=/checkout/purchase
+         filters:
+           - AuthenticationFilter
+
+       - id: identity-service
+         uri: lb://IDENTITY-SERVICE
+         predicates:
+           - Path=/auth/**
+
+ 
+eureka:
+  client:
+    service-url:
+      defaultZone : http://localhost:8761/eureka/
